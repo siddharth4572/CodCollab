@@ -14,10 +14,13 @@ const app = express()
 // You can also use an environment variable for this
 const allowedOrigins = [process.env.FRONTEND_URL || "http://localhost:5173"]
 
+console.log("Allowed Origins:", allowedOrigins)
+
 app.use(express.json())
 
 app.use(
-	cors({ origin: (origin, callback) => callback(null, true), credentials: true })
+	// Use the same origins for both Express and Socket.IO
+	cors({ origin: allowedOrigins, credentials: true })
 )
 
 const server = http.createServer(app)
