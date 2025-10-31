@@ -3,24 +3,28 @@ import dotenv from "dotenv"
 import http from "http"
 import cors from "cors"
 import { SocketEvent, SocketId } from "./types/socket"
-import { USER_CONNECTION_STATUS, User } from "./types/user"
+import { User, USER_CONNECTION_STATUS } from "./types/user"
 import { Server } from "socket.io"
-import path from "path"
 
 dotenv.config()
 
 const app = express()
 
+// You should update this with your Vercel app's URL
+// You can also use an environment variable for this
+const allowedOrigins = [process.env.FRONTEND_URL || "http://localhost:5173"]
+
 app.use(express.json())
 
-app.use(cors())
-
-app.use(express.static(path.join(__dirname, "public"))) // Serve static files
+app.use(
+	cors({ origin: (origin, callback) => callback(null, true), credentials: true })
+)
 
 const server = http.createServer(app)
 const io = new Server(server, {
 	cors: {
-		origin: "*",
+		origin: allowedOrigins,
+		methods: ["GET", "POST"],
 	},
 	maxHttpBufferSize: 1e8,
 	pingTimeout: 60000,
@@ -263,8 +267,7 @@ io.on("connection", (socket) => {
 const PORT = process.env.PORT || 3000
 
 app.get("/", (req: Request, res: Response) => {
-	// Send the index.html file
-	res.sendFile(path.join(__dirname, "..", "public", "index.html"))
+	res.send(`CodeCollab backend is running!`)
 })
 
 server.listen(PORT, () => {
